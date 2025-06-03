@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hanchen.mapper.MovieMapper">
+    <select id="selectByConditions" resultType="com.hanchen.entity.Movie">
+        SELECT * FROM movie_base
+        <where>
+            <if test="conditions.type != null and conditions.type != ''">
+                AND type = #{conditions.type}
+            </if>
+            <if test="conditions.year != null and conditions.year != ''">
+                <choose>
+                    <when test="conditions.year.contains('-')">
+                        AND YEAR(release_date) BETWEEN SUBSTRING_INDEX(#{conditions.year}, '-', 1) AND SUBSTRING_INDEX(#{conditions.year}, '-', -1)
+                    </when>
+                    <otherwise>
+                        AND YEAR(release_date) = #{conditions.year}
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="conditions.score != null and conditions.score != ''">
+                <choose>
+                    <when test="conditions.score.endsWith('+')">
+                        AND douban_score >= TRIM(TRAILING '+' FROM #{conditions.score})
+                    </when>
+                    <otherwise>
+                        AND douban_score = #{conditions.score}
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+    </select>
+</mapper>
